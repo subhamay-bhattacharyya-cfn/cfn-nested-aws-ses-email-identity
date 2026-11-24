@@ -12,11 +12,47 @@ Metadata:
           default: "SES Email Identity Configuration"
         Parameters:
           - SesEmailIdentity
+      - Label:
+          default: "Common Configuration"
+        Parameters:
+          - ProjectName
+          - Environment
+          - CiSuffix
     ParameterLabels:
       SesEmailIdentity:
         default: "SES Email Identity (Email Address or Domain)"
+      ProjectName:
+        default: "Project Name"
+      Environment:
+        default: "Environment"
+      CiSuffix:
+        default: "CI Suffix"
 
 Parameters:
+  ProjectName:
+    Type: String
+    Description: "Project name used as a prefix for resource naming"
+    MinLength: 1
+    MaxLength: 64
+    AllowedPattern: "^[a-z0-9][a-z0-9-]*[a-z0-9]$"
+    ConstraintDescription: "Must start and end with a lowercase letter or number and contain only lowercase letters, numbers and hyphens"
+
+  Environment:
+    Type: String
+    Description: "Deployment environment label (for example devl, stag, prod)"
+    MinLength: 1
+    MaxLength: 16
+    AllowedPattern: "^[a-z0-9]+$"
+    ConstraintDescription: "Must contain only lowercase letters and numbers"
+
+  CiSuffix:
+    Type: String
+    Default: ""
+    MaxLength: 16
+    AllowedPattern: "^$|^[a-z0-9-]+$"
+    ConstraintDescription: "Must be empty or contain only lowercase letters, numbers and hyphens"
+    Description: "Optional suffix for CI/CD deployments so test stacks do not collide. Leave empty outside CI."
+
   SesEmailIdentity:
     Type: String
     Default: ""
@@ -37,6 +73,13 @@ Resources:
             conf: high
     Properties:
       EmailIdentity: !Ref SesEmailIdentity
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: CiSuffix
+          Value: !Ref CiSuffix
 
 Outputs:
   SesEmailIdentityName:
