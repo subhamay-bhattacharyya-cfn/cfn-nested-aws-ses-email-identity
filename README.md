@@ -1,19 +1,50 @@
-# CloudFormation S3 Template Repository
+# CloudFormation Nested Stack Template : Simple EMail Service Identity
 
 <!-- Row 1: Status - Most Important -->
-[![Release](https://img.shields.io/github/v/release/subhamay-bhattacharyya/aws-bedrock-faq-chatbot?label=Release)](https://github.com/subhamay-bhattacharyya/aws-bedrock-faq-chatbot/releases)&nbsp;[![Release Workflow](https://github.com/subhamay-bhattacharyya/aws-bedrock-faq-chatbot/actions/workflows/release.yaml/badge.svg)](https://github.com/subhamay-bhattacharyya/aws-bedrock-faq-chatbot/actions/workflows/release.yaml)&nbsp;[![Issues](https://img.shields.io/github/issues/subhamay-bhattacharyya/aws-bedrock-faq-chatbot)](https://github.com/subhamay-bhattacharyya/aws-bedrock-faq-chatbot/issues)&nbsp;[![Last Commit](https://img.shields.io/github/last-commit/subhamay-bhattacharyya/aws-bedrock-faq-chatbot)](https://github.com/subhamay-bhattacharyya/aws-bedrock-faq-chatbot/commits)
+[![Release](https://img.shields.io/github/v/release/subhamay-bhattacharyya-cfn/cfn-nested-aws-ses-email-identity?label=Release)](https://github.com/subhamay-bhattacharyya-cfn/cfn-nested-aws-ses-email-identity/releases)&nbsp;[![Release Workflow](https://github.com/subhamay-bhattacharyya-cfn/cfn-nested-aws-ses-email-identity/actions/workflows/release.yaml/badge.svg)](https://github.com/subhamay-bhattacharyya-cfn/cfn-nested-aws-ses-email-identity/actions/workflows/release.yaml)&nbsp;[![Issues](https://img.shields.io/github/issues/subhamay-bhattacharyya-cfn/cfn-nested-aws-ses-email-identity)](https://github.com/subhamay-bhattacharyya-cfn/cfn-nested-aws-ses-email-identity/issues)&nbsp;[![Last Commit](https://img.shields.io/github/last-commit/subhamay-bhattacharyya-cfn/cfn-nested-aws-ses-email-identity)](https://github.com/subhamay-bhattacharyya-cfn/cfn-nested-aws-ses-email-identity/commits)
 
 <!-- Row 2: Code Quality -->
-[![Top Language](https://img.shields.io/badge/Languages-Python%20%7C%20YAML-blue)](https://github.com/subhamay-bhattacharyya/aws-bedrock-faq-chatbot)&nbsp;[![Commits](https://img.shields.io/github/commit-activity/t/subhamay-bhattacharyya/aws-bedrock-faq-chatbot)](https://github.com/subhamay-bhattacharyya/aws-bedrock-faq-chatbot/commits)
+[![Top Language](https://img.shields.io/badge/Languages-Python%20%7C%20YAML-blue)](https://github.com/subhamay-bhattacharyya-cfn/cfn-nested-aws-ses-email-identity)&nbsp;[![Commits](https://img.shields.io/github/commit-activity/t/subhamay-bhattacharyya-cfn/cfn-nested-aws-ses-email-identity)](https://github.com/subhamay-bhattacharyya-cfn/cfn-nested-aws-ses-email-identity/commits)
 
 <!-- Row 3: Tech Stack -->
 [![CloudFormation](https://img.shields.io/badge/CloudFormation-IaC-orange?logo=amazonaws&logoColor=white)](https://aws.amazon.com/cloudformation/)&nbsp;[![Built with Claude Code](https://img.shields.io/badge/Built_with-Claude_Code-D97757?logo=anthropic&logoColor=white)](https://claude.ai/)
 
 <!-- Row 4: Repository Info -->
-[![Files](https://img.shields.io/github/directory-file-count/subhamay-bhattacharyya/aws-bedrock-faq-chatbot)](https://github.com/subhamay-bhattacharyya/aws-bedrock-faq-chatbot)&nbsp;[![Repo Size](https://img.shields.io/github/repo-size/subhamay-bhattacharyya/aws-bedrock-faq-chatbot)](https://github.com/subhamay-bhattacharyya/aws-bedrock-faq-chatbot)&nbsp;[![Release Date](https://img.shields.io/github/release-date/subhamay-bhattacharyya/aws-bedrock-faq-chatbot)](https://github.com/subhamay-bhattacharyya/aws-bedrock-faq-chatbot/releases)
+[![Files](https://img.shields.io/github/directory-file-count/subhamay-bhattacharyya-cfn/cfn-nested-aws-ses-email-identity)](https://github.com/subhamay-bhattacharyya-cfn/cfn-nested-aws-ses-email-identity)&nbsp;[![Repo Size](https://img.shields.io/github/repo-size/subhamay-bhattacharyya-cfn/cfn-nested-aws-ses-email-identity)](https://github.com/subhamay-bhattacharyya-cfn/cfn-nested-aws-ses-email-identity)&nbsp;[![Release Date](https://img.shields.io/github/release-date/subhamay-bhattacharyya-cfn/cfn-nested-aws-ses-email-identity)](https://github.com/subhamay-bhattacharyya-cfn/cfn-nested-aws-ses-email-identity/releases)
 
 <!-- Row 5: Custom Metrics -->
-[![Custom Endpoint](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bsubhamay/52393fb36dc28479957fbb381dda208a/raw/aws-bedrock-faq-chatbot.json)](https://gist.github.com/subhamay-bhattacharyya/52393fb36dc28479957fbb381dda208a)
+[![Custom Endpoint](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bsubhamay/a6b789898e071aaaf209977d77b91032/raw/cfn-nested-aws-ses-email-identity.json)](https://gist.github.com/subhamay-bhattacharyya/a6b789898e071aaaf209977d77b91032)
+
+## SES Email Identity Stack
+
+`cloudformation/template.yaml` is a root CloudFormation template that optionally registers an [Amazon SES](https://aws.amazon.com/ses/) email identity. The identity is created only when `SesEmailIdentity` is set. Leave it empty and the stack creates no resources.
+
+### Parameters
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `SesEmailIdentity` | String | `""` | An email address (`alerts@example.com`) or a domain (`example.com`). Empty skips creation. |
+
+### Outputs
+
+- `SesEmailIdentityName` — The SES identity that was created (only when `SesEmailIdentity` is set)
+
+### Deploy
+
+```bash
+aws cloudformation deploy \
+  --template-file cloudformation/template.yaml \
+  --stack-name ses-email-identity \
+  --parameter-overrides SesEmailIdentity=alerts@example.com \
+  --region us-east-1
+```
+
+### Verify the Identity
+
+- **Email address:** SES sends a verification email. The identity stays `PENDING` until the link in that email is clicked.
+- **Domain:** SES requires DNS records (DKIM CNAMEs, and optionally a verification TXT record). Add them to the domain's DNS. The identity stays `PENDING` until they resolve. Get the records from the SES console or with `aws sesv2 get-email-identity --email-identity example.com`.
+
+> **Note:** New SES accounts start in the sandbox, which limits sending to verified identities. Request production access in SES before sending to unverified recipients.
 
 ---
 

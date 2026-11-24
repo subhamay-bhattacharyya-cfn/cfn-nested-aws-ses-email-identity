@@ -4,25 +4,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-This is a **CloudFormation template repository** that provides reusable nested stack templates for deploying S3 buckets with security best practices. Templates follow the nested stack pattern and are designed to be referenced by parent CloudFormation stacks.
+This is a **CloudFormation template repository**. The current template, `cloudformation/template.yaml`, is a root stack that optionally creates an Amazon SES email identity (an email address or domain). It has no nested stacks.
 
 **Key characteristics:**
 
-- Nested CloudFormation templates (referenced via `TemplateURL`)
-- Parameterized bucket naming with account ID, environment, and region
-- S3 security defaults: versioning enabled, public access blocked
-- Optional S3 bucket policy enforcement (encryption, secure transport)
+- Root CloudFormation template with a conditional `AWS::SES::EmailIdentity` resource
+- The identity is created only when `SesEmailIdentity` is non-empty
 - Automated semantic versioning and releases
 - AWS OIDC authentication for CI/CD deployments
+
+The `templates/` S3 nested stacks described below predate the current root template. Check that they still exist before relying on them.
 
 ## Project Structure
 
 ```text
-templates/
+cloudformation/
+├── template.yaml                 # Root stack: optional SES email identity
+├── parameters.json               # Parameter values
+└── stack-config.json             # Stack configuration
+
+templates/                        # Legacy nested S3 templates (may be stale)
 ├── s3-bucket.yaml                # Nested template: S3 bucket creation
 └── s3-bucket-policy.yaml         # Nested template: S3 bucket policy
 
-parameters/
+parameters/                       # Legacy parameter files
 ├── dev.json                       # Parameters for development environment
 ├── staging.json                   # Parameters for staging environment
 ├── prod.json                      # Parameters for production environment
@@ -74,7 +79,18 @@ Select `feat`, `fix`, or `chore` type. Only `feat` and `fix` trigger releases.
 
 ## Key Architecture Concepts
 
-### Nested Stack Pattern
+### Root Stack: SES Email Identity
+
+`cloudformation/template.yaml` defines:
+
+- **Parameter** `SesEmailIdentity`: email address or domain. Empty skips creation.
+- **Condition** `CreateSesIdentity`: true when `SesEmailIdentity` is non-empty.
+- **Resource** `SesEmailIdentityResource` (`AWS::SES::EmailIdentity`): conditional.
+- **Output** `SesEmailIdentityName`: conditional.
+
+Email identities send a verification email and stay `PENDING` until the link is clicked. Domain identities need DKIM and verification DNS records.
+
+### Legacy Nested Stack Pattern (S3 templates)
 
 This repo provides **nested stack templates** — templates that are referenced from parent/root CloudFormation stacks via `TemplateURL`. The templates are self-contained and export outputs for cross-stack references.
 
@@ -187,7 +203,24 @@ The `s3-bucket-policy.yaml` template checks if `BucketName` is provided; if not,
 
 ## Testing & Validation
 
-**Manual template validation:**
+**Validate the root template:**
+
+```bash
+cfn-lint cloudformation/template.yaml
+aws cloudformation validate-template --template-body file://cloudformation/template.yaml --region us-east-1
+```
+
+**Deploy the root template:**
+
+```bash
+aws cloudformation deploy \
+  --template-file cloudformation/template.yaml \
+  --stack-name ses-email-identity \
+  --parameter-overrides SesEmailIdentity=alerts@example.com \
+  --region us-east-1
+```
+
+**Legacy S3 templates:**
 
 ```bash
 aws cloudformation validate-template --template-body file://templates/s3-bucket.yaml
