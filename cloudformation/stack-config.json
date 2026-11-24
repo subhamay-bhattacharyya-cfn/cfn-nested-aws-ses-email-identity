@@ -1,5 +1,5 @@
 {
-  "stackName": "/cfn-nested-aws-ses-email-identity-stack",
+  "stackName": "cfn-nested-aws-ses-email-identity-stack",
   "templateFile": "cloudformation/template.yaml",
   "parameterFile": "cloudformation/parameters.json"
 }
